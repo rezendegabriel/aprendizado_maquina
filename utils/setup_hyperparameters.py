@@ -7,12 +7,13 @@ import os
 hps = {
     "model": "", # Which model do you want to train
     "name": "",  # Whatever you want to name your run
+    "simulation": "2", # Experiment simulation
     "model_save_dir": "",  # Where will checkpoints be stored (path created automatically using hps["name"])
     "dataset_type": "", # Binary or multi-class
     "dataset": "", # Dataset name
     "datset_path": "", # Path created automatically using hps["dataset_type"] and hps["dataset"]
     "start_epoch": "",
-    "num_epochs": 300,
+    "num_epochs": 500,
     "num_inputs": "", # Number of attributes of dataset
     "num_outputs": "", # Number of classes of dataset
     "layer_size": 4, # Number of neurons proportional to the number of inputs
@@ -26,6 +27,9 @@ hps = {
     "z": "", # Interval z of resampling that each class-based sampling occurs
     "k_fold": 5, # Cross validation
     "init_sampling": "", # Initial sampling ("stratified", "inverse-stratified" or "balanced")
+    "adaptive_sampling": "", # Adaptive sampling ("class", "conf" or "conf-class")
+    "val_set": "", # "train" or "val"
+    "verbose": 3 # (0) Epoch | (1) Train Acc. | Val Acc. | (2) Class Acc. | (3) Time
 }
 
 possible_models = set(file_name.split(".")[0] for file_name in os.listdir("models"))
@@ -54,6 +58,7 @@ def setup_hyperparameters(args):
         
     # Invalid parameter check
     try:
+        hps["simulation"] = int(hps["simulation"])
         hps["start_epoch"] = int(hps["start_epoch"])
         hps["num_epochs"] = int(hps["num_epochs"])
         hps["num_inputs"] = int(hps["num_inputs"])
@@ -66,6 +71,7 @@ def setup_hyperparameters(args):
         hps["weight_decay"] = float(hps["weight_decay"])
         hps["z"] = int(hps["z"])
         hps["k_fold"] = int(hps["k_fold"])
+        hps["verbose"] = int(hps["verbose"])
         
         # Invalid dataset check
         dataset = hps["dataset"] + "-" + str(hps["k_fold"]) + "-fold"
@@ -73,7 +79,12 @@ def setup_hyperparameters(args):
             raise ValueError("Invalid dataset.\nPossible ones include:\n - " + "\n - ".join(possible_dataset))
 
         # Create checkpoint directory
-        hps["model_save_dir"] = os.path.join(os.getcwd(), "checkpoints", hps["dataset_type"], hps["name"])
+        hps["model_save_dir"] = os.path.join(os.getcwd(),
+                                             "checkpoints",
+                                             hps["dataset_type"],
+                                             "simulation_{}".format(hps["simulation"]),
+                                             hps["dataset"],
+                                             hps["name"])
 
         if not os.path.exists(hps["model_save_dir"]):
             os.makedirs(hps["model_save_dir"])

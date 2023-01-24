@@ -50,16 +50,15 @@ def evaluate(hps):
     
     # Cross validation
     for k in range(1, k_fold+1):
-        _, test_loader, weights = get_dataloaders(hps = hps, k = k) # Get data with no augmentation
+        _, _, test_loader, _, _ = get_dataloaders(hps = hps, k = k) # Get data with no augmentation
         
         # Build model
-        logger, model = setup_model(hps, k = k)
+        _, model = setup_model(hps, k = k)
         model = model.to(device)
     
         print(model)
 
         model = model.eval()
-    
         for data in test_loader:
             inputs, labels, id_inputs = data
             inputs, labels, id_inputs = inputs.to(device), labels.to(device), id_inputs.to(device)
